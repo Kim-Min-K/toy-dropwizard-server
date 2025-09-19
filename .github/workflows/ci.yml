@@ -1,13 +1,25 @@
-name: continuous integration
+name: continuous integration example
 on:
   push:
     branches:
+      - min
       - main
   pull_request:
-    branches:
-      - main
+    types:
+      - opened
+      - reopened
+  pull_request_target:
+    types:
+      - closed
 
 jobs:
+  if_merged:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo The PR was merged!
+
   build-and-test:
     runs-on: ubuntu-latest
     steps:

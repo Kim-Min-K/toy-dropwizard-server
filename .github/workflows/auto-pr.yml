@@ -1,0 +1,43 @@
+name: Automated PR
+
+on:
+  push:
+    branches:
+      - '*' # Trigger on a push to any branch
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get current branch name
+          BRANCH=$(echo $GITHUB_REF | cut -d'/' -f3)
+          
+          # Don't create PR for main or master branches
+          if [[ "$BRANCH" == "main" ]] || [[ "$BRANCH" == "master" ]]; then
+            echo "Push on main or master branch, no PR needed."
+            exit 0
+          fi
+          
+          # Check if PR already exists using GitHub CLI
+          PR_EXISTS=$(gh pr list --head "$BRANCH" --json number --jq length)
+          if [ "$PR_EXISTS" -eq 0 ]; then
+            # Create PR if it doesn't exist
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "Auto PR: $BRANCH" \
+              --body "Automated pull request created from $BRANCH" \
+              --label "automated-pr"
+          else
+            echo "A pull request for this branch already exists."
+          fi
