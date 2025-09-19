@@ -6,11 +6,6 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./HouseSimulator/House/src
-
     steps:
       - uses: actions/checkout@v1
       - name: Install Java
@@ -24,3 +19,4 @@ jobs:
           ./gradlew build -x test
       - name: Run tests
         run: ./gradlew test
+
